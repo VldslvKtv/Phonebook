@@ -1,11 +1,9 @@
 import json
 import ast
-import pprint
-import pandas
 
 
 class Phonebook():
-    def __init__(self, name, lastname, surname, organization, work_phone, personal_phone):
+    def __init__(self, name: str, lastname: str, surname: str, organization: str, work_phone: str, personal_phone: str):
         self.name = name
         self.lastname = lastname
         self.surname = surname
@@ -30,7 +28,7 @@ class Phonebook():
                 'Work_phone': self.work_phone, 'Personal_phone': self.personal_phone}
 
 
-def add_note(directory):
+def add_note(directory: str):
     print('Добавить запись:')
     with open(directory, 'a+') as f:
         new_elem = Phonebook.from_input().asdict()
@@ -38,7 +36,7 @@ def add_note(directory):
         f.close()
 
 
-def print_info(directory):
+def print_info(directory: str):
     with open(directory, 'r', encoding='utf-8') as file:  # открыли файл с данными
         for elem in file:
             d_elem = ast.literal_eval(elem)
@@ -47,9 +45,21 @@ def print_info(directory):
             print('\n')
 
 
-def change_book(directory):
-    print('Выберете номер записи')
-    num = int(input())
+def numbers_of_lines(directory: str):
+    with open(directory, 'r+', encoding='utf-8') as file:
+        lines = file.readlines()
+    return len(lines)
+
+
+def change_book(directory: str):
+    quantity = numbers_of_lines(directory)
+    print(f'Выберете номер записи, начиная c 0 и до {quantity - 1}')
+    while True:
+        num = int(input())
+        if num < 0 | num > (quantity - 1):
+            print('Некорректно введен номер записи. Попробуйте еще раз.')
+        else:
+            break
     count = 0
     with open(directory, 'r+', encoding='utf-8') as file:
         lines = file.readlines()
@@ -65,9 +75,10 @@ def change_book(directory):
     with open(directory, 'w+', encoding='utf-8') as file:
         for elem in lines:
             file.write(elem)
+    print('\n')
 
 
-def comprasion(s_elem, elem_from_file):
+def comprasion(s_elem: dict, elem_from_file: dict):
     if (s_elem['Name'] != 'None' and s_elem['Name'] == elem_from_file['Name']) or (s_elem['Name'] == 'None'):
         if ((s_elem['Lastname'] != 'None' and s_elem['Lastname'] == elem_from_file['Lastname']) or
                 (s_elem['Lastname'] == 'None')):
@@ -84,7 +95,7 @@ def comprasion(s_elem, elem_from_file):
                             return True
 
 
-def search(directory):
+def search(directory: str):
     print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
     search_element = Phonebook.from_input().asdict()
     with open(directory, 'r+', encoding='utf-8') as file:
@@ -108,14 +119,7 @@ def search(directory):
 
 
 if __name__ == "__main__":
-    base_directory = 'base.txt'
-    #print_info(directory1)
-    # change_book(directory1)
-    # print_info(directory1)
-    #add_note(directory1)
-
-    #res = search(directory1)
-    #print(res)
+    BASE_DIRECTORY = 'base.txt'
     print('\033[1m' + 'Телефонный справочник' + '\033[0m\n')
     while True:
         print('Информация для взаимодействия со справочником:')
@@ -125,15 +129,14 @@ if __name__ == "__main__":
         action = int(input())
         match action:
             case 1:
-                print_info(base_directory)
+                print_info(BASE_DIRECTORY)
             case 2:
-                add_note(base_directory)
+                add_note(BASE_DIRECTORY)
             case 3:
-                change_book(base_directory)
+                change_book(BASE_DIRECTORY)
             case 4:
-                search(base_directory)
+                search(BASE_DIRECTORY)
             case 5:
                 exit(0)
-
-
-
+            case _:
+                print("Такой команды нет")
