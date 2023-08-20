@@ -48,7 +48,7 @@ def print_info(directory):
 
 
 def change_book(directory):
-    print('Выберете номер запись')
+    print('Выберете номер записи')
     num = int(input())
     count = 0
     with open(directory, 'r+', encoding='utf-8') as file:
@@ -58,7 +58,7 @@ def change_book(directory):
             file.readline()
             count += 1
         line = file.readline()
-        print('Cтрока для изменений')
+        print('Cтрока для изменений:')
         print(line)
     print('Вводите новые поля записи')
     lines[num] = str(Phonebook.from_input().asdict()) + '\n'
@@ -85,7 +85,7 @@ def comprasion(s_elem, elem_from_file):
 
 
 def search(directory):
-    print('Если по какой-то характеристике не нужне поиск - впишите в значения поля None')
+    print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
     search_element = Phonebook.from_input().asdict()
     with open(directory, 'r+', encoding='utf-8') as file:
         lines = file.readlines()
@@ -101,15 +101,39 @@ def search(directory):
     else:
         print('Найдены следующие записи:')
         for record in records:
-            print(record)
+            for item, amount in record.items():
+                print("{}: {}".format(item, amount))
+        print('\n')
         return 'Конец поиска'
 
 
-directory1 = 'base.txt'
-print_info(directory1)
-# change_book(directory1)
-# print_info(directory1)
-# add_note(directory1)
+if __name__ == "__main__":
+    base_directory = 'base.txt'
+    #print_info(directory1)
+    # change_book(directory1)
+    # print_info(directory1)
+    #add_note(directory1)
 
-res = search(directory1)
-print(res)
+    #res = search(directory1)
+    #print(res)
+    print('\033[1m' + 'Телефонный справочник' + '\033[0m\n')
+    while True:
+        print('Информация для взаимодействия со справочником:')
+        print(''' 1 - Вывод постранично записей из справочника\n 2 - Добавление новой записи в справочник
+ 3 - Редактирование записи\n 4 - Поиск записи\n 5 - Закрыть справочник\n''')
+        print('Действие:')
+        action = int(input())
+        match action:
+            case 1:
+                print_info(base_directory)
+            case 2:
+                add_note(base_directory)
+            case 3:
+                change_book(base_directory)
+            case 4:
+                search(base_directory)
+            case 5:
+                exit(0)
+
+
+
