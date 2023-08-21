@@ -2,7 +2,7 @@ import json
 import ast
 
 
-class Phonebook():
+class Phonebook(object):
     def __init__(self, name: str, lastname: str, surname: str, organization: str, work_phone: str, personal_phone: str):
         self.name = name
         self.lastname = lastname
@@ -14,12 +14,12 @@ class Phonebook():
     @classmethod
     def from_input(cls):
         return cls(
-            input('Name: '),
-            input('Lastname: '),
-            input('Surname: '),
-            input('Organization: '),
-            input('Work_phone: '),
-            input('Personal_phone: '),
+            check_titles('Name: '),
+            check_titles('Lastname: '),
+            check_titles('Surname: '),
+            check_titles('Organization: '),
+            check_number('Work_phone: '),
+            check_number('Personal_phone: ')
         )
 
     def asdict(self):
@@ -28,26 +28,47 @@ class Phonebook():
                 'Work_phone': self.work_phone, 'Personal_phone': self.personal_phone}
 
 
+def check_titles(explantion: str):
+    while True:
+        print(f'{explantion}', end="")
+        title: str = input()
+        if len(title) < 1:
+            print('Некорректный ввод. Введите ещё раз.')
+        else:
+            return title
+
+
+def check_number(explantion: str):
+    while True:
+        print(f'{explantion}', end="")
+        phone_number: str = input()
+        if (len(phone_number) == 12 and phone_number.isdigit()) | (phone_number[0] == '+'
+                    and len(phone_number) == 12 and phone_number[1:].isdigit()) | (phone_number == 'None'):
+            return phone_number
+        else:
+            print('Некорректный номер. Введите ещё раз')
+
+
 def add_note(directory: str):
     print('Добавить запись:')
     with open(directory, 'a+') as f:
-        new_elem = Phonebook.from_input().asdict()
+        new_elem: dict = Phonebook.from_input().asdict()
         f.write(str(new_elem) + '\n')
         f.close()
 
 
 def print_info(directory: str):
-    with open(directory, 'r', encoding='utf-8') as file:  # открыли файл с данными
+    with open(directory, 'r') as file:  # открыли файл с данными
         for elem in file:
-            d_elem = ast.literal_eval(elem)
+            d_elem: dict = ast.literal_eval(elem)
             for item, amount in d_elem.items():
                 print("{}: {}".format(item, amount))
             print('\n')
 
 
 def numbers_of_lines(directory: str):
-    with open(directory, 'r+', encoding='utf-8') as file:
-        lines = file.readlines()
+    with open(directory, 'r+') as file:
+        lines: list = file.readlines()
     return len(lines)
 
 
@@ -55,24 +76,25 @@ def change_book(directory: str):
     quantity = numbers_of_lines(directory)
     print(f'Выберете номер записи, начиная c 0 и до {quantity - 1}')
     while True:
-        num = int(input())
+        num: int = int(input())
         if num < 0 | num > (quantity - 1):
             print('Некорректно введен номер записи. Попробуйте еще раз.')
         else:
             break
-    count = 0
-    with open(directory, 'r+', encoding='utf-8') as file:
-        lines = file.readlines()
+    count: int = 0
+    with open(directory, 'r+') as file:
+        lines: list = file.readlines()
+        print(type(lines))
         file.seek(0)
         while count != num:
             file.readline()
             count += 1
-        line = file.readline()
+        line: str = file.readline()
         print('Cтрока для изменений:')
         print(line)
     print('Вводите новые поля записи')
     lines[num] = str(Phonebook.from_input().asdict()) + '\n'
-    with open(directory, 'w+', encoding='utf-8') as file:
+    with open(directory, 'w+') as file:
         for elem in lines:
             file.write(elem)
     print('\n')
@@ -97,46 +119,47 @@ def comprasion(s_elem: dict, elem_from_file: dict):
 
 def search(directory: str):
     print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
-    search_element = Phonebook.from_input().asdict()
-    with open(directory, 'r+', encoding='utf-8') as file:
-        lines = file.readlines()
-    records = []
+    search_element: dict = Phonebook.from_input().asdict()
+    print('\n')
+    with open(directory, 'r+') as file:
+        lines: list = file.readlines()
+    records: list = []
     for elem in lines:
-        d_elem = elem.replace("'", "\"")
-        d_elem = json.loads(d_elem)
-        result = comprasion(search_element, d_elem)
+        d_elem: str = elem.replace("'", "\"")
+        d_elem: dict = json.loads(d_elem)
+        result: bool = comprasion(search_element, d_elem)
         if result:
             records.append(d_elem)
     if len(records) == 0:
-        return 'Записей не найдено'
+        return print('Записей не найдено\n')
     else:
-        print('Найдены следующие записи:')
+        print('Найдены следующие записи:\n')
         for record in records:
             for item, amount in record.items():
                 print("{}: {}".format(item, amount))
-        print('\n')
-        return 'Конец поиска'
+            print('\n')
+        return print('Конец \n')
 
 
 if __name__ == "__main__":
-    BASE_DIRECTORY = 'base.txt'
+    BASE_DIRECTORY: str = 'base.txt'
     print('\033[1m' + 'Телефонный справочник' + '\033[0m\n')
     while True:
         print('Информация для взаимодействия со справочником:')
         print(''' 1 - Вывод постранично записей из справочника\n 2 - Добавление новой записи в справочник
  3 - Редактирование записи\n 4 - Поиск записи\n 5 - Закрыть справочник\n''')
         print('Действие:')
-        action = int(input())
+        action: str = input()
         match action:
-            case 1:
+            case '1':
                 print_info(BASE_DIRECTORY)
-            case 2:
+            case '2':
                 add_note(BASE_DIRECTORY)
-            case 3:
+            case '3':
                 change_book(BASE_DIRECTORY)
-            case 4:
+            case '4':
                 search(BASE_DIRECTORY)
-            case 5:
+            case '5':
                 exit(0)
             case _:
-                print("Такой команды нет")
+                print("Такой команды нет. Введите существующую команду.\n")
