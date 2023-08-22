@@ -43,7 +43,9 @@ def check_number(explantion: str):
         print(f'{explantion}', end="")
         phone_number: str = input()
         if (len(phone_number) == 12 and phone_number.isdigit()) | (phone_number[0] == '+'
-                    and len(phone_number) == 12 and phone_number[1:].isdigit()) | (phone_number == 'None'):
+                                                                   and len(phone_number) == 12 and phone_number[
+                                                                                                   1:].isdigit()) | (
+                phone_number == 'None'):
             return phone_number
         else:
             print('Некорректный номер. Введите ещё раз')
@@ -61,8 +63,8 @@ def print_info(directory: str):
     with open(directory, 'r') as file:  # открыли файл с данными
         for elem in file:
             d_elem: dict = ast.literal_eval(elem)
-            for item, amount in d_elem.items():
-                print("{}: {}".format(item, amount))
+            for key, value in d_elem.items():
+                print("{}: {}".format(key, value))
             print('\n')
 
 
@@ -101,20 +103,10 @@ def change_book(directory: str):
 
 
 def comprasion(s_elem: dict, elem_from_file: dict):
-    if (s_elem['Name'] != 'None' and s_elem['Name'] == elem_from_file['Name']) or (s_elem['Name'] == 'None'):
-        if ((s_elem['Lastname'] != 'None' and s_elem['Lastname'] == elem_from_file['Lastname']) or
-                (s_elem['Lastname'] == 'None')):
-            if ((s_elem['Surname'] != 'None' and s_elem['Surname'] == elem_from_file['Surname']) or
-                    (s_elem['Surname'] == 'None')):
-                if ((s_elem['Organization'] != 'None' and s_elem['Organization'] == elem_from_file[
-                    'Organization']) or
-                        (s_elem['Organization'] == 'None')):
-                    if ((s_elem['Work_phone'] != 'None' and s_elem['Work_phone'] == elem_from_file['Work_phone']) or
-                            (s_elem['Work_phone'] == 'None')):
-                        if ((s_elem['Personal_phone'] != 'None' and s_elem['Personal_phone'] == elem_from_file[
-                            'Personal_phone']) or
-                                (s_elem['Personal_phone'] == 'None')):
-                            return True
+    for key in s_elem.keys():
+        if s_elem[key] != elem_from_file[key] and s_elem[key] != 'None':
+            return False
+    return True
 
 
 def search(directory: str):
@@ -135,8 +127,8 @@ def search(directory: str):
     else:
         print('Найдены следующие записи:\n')
         for record in records:
-            for item, amount in record.items():
-                print("{}: {}".format(item, amount))
+            for key, value in record.items():
+                print("{}: {}".format(key, value))
             print('\n')
         return print('Конец \n')
 
