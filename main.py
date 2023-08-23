@@ -3,6 +3,16 @@ import ast
 
 class Validation(object):
     @staticmethod
+    def validate_int():
+        while True:
+            try:
+                int_obj = int(input())
+            except ValueError:
+                print('Введите целое неотрицательное число.')
+            else:
+                return int_obj
+
+    @staticmethod
     def validate_id(explantion: str, quantity: int, former_id: int):
         if former_id == 0:
             new_id = quantity + 1
@@ -31,9 +41,7 @@ class Validation(object):
             print(f'{explantion}', end="")
             phone_number: str = input()
             if (len(phone_number) == 11 and phone_number.isdigit()) | (phone_number[0] == '+'
-                                                                       and len(phone_number) == 12 and phone_number[
-                                                                                                       1:].isdigit()) | (
-                    phone_number == 'None'):
+                        and len(phone_number) == 12 and phone_number[1:].isdigit()) | (phone_number == 'None'):
                 return phone_number
             else:
                 print('Некорректный номер. Введите ещё раз')
@@ -41,9 +49,9 @@ class Validation(object):
     @staticmethod
     def validation_line_number(quantity_lines: int):
         while True:
-            line_number: int = int(input())
-            if (line_number < 0) | (line_number > (quantity_lines)):
-                print('Некорректно введен номер записи. Попробуйте еще раз.')
+            line_number: int = Validation.validate_int()
+            if (line_number < 0) | (line_number > quantity_lines):
+                print('Некорректно введен id записи. Попробуйте еще раз.')
             else:
                 return line_number
 
