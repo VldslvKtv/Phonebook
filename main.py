@@ -1,8 +1,23 @@
 import json
 import ast
+import os
 
 
-class Validation():
+class Validation(object):
+    BASE_DIRECTORY: str = 'base.txt'
+
+    @staticmethod
+    def validate_id(explantion: str, directory: str, former_id: int):
+        if former_id == 0:
+            new_id = numbers_of_lines(directory) + 1
+            print(f'{explantion}{new_id}')
+            return new_id
+        elif former_id == -1:
+            print(f'{explantion}{None}')
+            return None
+        else:
+            print(f'{explantion}{former_id}')
+            return former_id
 
     @staticmethod
     def validate_titles(explantion: str):
@@ -20,25 +35,25 @@ class Validation():
             print(f'{explantion}', end="")
             phone_number: str = input()
             if (len(phone_number) == 11 and phone_number.isdigit()) | (phone_number[0] == '+'
-                                                                       and len(phone_number) == 12 and phone_number[
-                                                                                                       1:].isdigit()) | (
-                    phone_number == 'None'):
+                    and len(phone_number) == 12 and phone_number[1:].isdigit()) | (phone_number == 'None'):
                 return phone_number
             else:
                 print('Некорректный номер. Введите ещё раз')
 
     @staticmethod
-    def validation_line_number(quantity_lines):
+    def validation_line_number(quantity_lines: int):
         while True:
             line_number: int = int(input())
-            if line_number < 0 | line_number > (quantity_lines - 1):
+            if (line_number < 0) | (line_number > (quantity_lines)):
                 print('Некорректно введен номер записи. Попробуйте еще раз.')
             else:
                 return line_number
 
 
 class Record(object):
-    def __init__(self, name: str, lastname: str, surname: str, organization: str, work_phone: str, personal_phone: str):
+    def __init__(self, id_record: int, name: str, lastname: str, surname: str, organization: str, work_phone: str,
+                 personal_phone: str):
+        self.id_record = id_record
         self.name = name
         self.lastname = lastname
         self.surname = surname
@@ -47,8 +62,9 @@ class Record(object):
         self.personal_phone = personal_phone
 
     @classmethod
-    def from_input(cls):
+    def from_input(cls, former_id: int):
         return cls(
+            Validation.validate_id('ID: ', Validation.BASE_DIRECTORY, former_id),
             Validation.validate_titles('Name: '),
             Validation.validate_titles('Lastname: '),
             Validation.validate_titles('Surname: '),
@@ -58,7 +74,7 @@ class Record(object):
         )
 
     def convert_record_to_dict(self):
-        return {'Name': self.name, 'Lastname': self.lastname, 'Surname': self.surname,
+        return {'ID': self.id_record, 'Name': self.name, 'Lastname': self.lastname, 'Surname': self.surname,
                 'Organization': self.organization,
                 'Work_phone': self.work_phone, 'Personal_phone': self.personal_phone}
 
@@ -72,16 +88,9 @@ def print_dict(dict_for_print: dict):
 def add_note(directory: str):
     print('Добавить запись:')
     with open(directory, 'a+') as f:
-        new_elem: dict = Record.from_input().convert_record_to_dict()
+        new_elem: dict = Record.from_input(0).convert_record_to_dict()
         f.write(str(new_elem) + '\n')
         f.close()
-
-
-def print_info(directory: str):
-    with open(directory, 'r') as file:  # открыли файл с данными
-        for elem in file:
-            d_elem: dict = ast.literal_eval(elem)
-            print_dict(d_elem)
 
 
 def numbers_of_lines(directory: str):
@@ -90,22 +99,32 @@ def numbers_of_lines(directory: str):
     return len(lines)
 
 
+def print_info(directory: str):
+    with open(directory, 'r') as file:  # открыли файл с данными
+        if os.path.getsize(directory) > 0:
+            for elem in file:
+                d_elem: dict = ast.literal_eval(elem)
+                print_dict(d_elem)
+        else:
+            print('Файл пуст\n')
+
+
 def change_book(directory: str):
     quantity = numbers_of_lines(directory)
-    print(f'Выберете номер записи, начиная c 0 и до {quantity - 1}')
+    print(f'Выберете id записи, начиная c 1 и до {quantity}')
     num = Validation.validation_line_number(quantity)
     with open(directory, 'r+') as file:
         lines: list = file.readlines()
         file.seek(0)
         count: int = 0
-        while count != num:
+        while count != num-1:
             file.readline()
             count += 1
         line: str = file.readline()
-        print('Cтрока для изменений:')
-        print(line)
+        print(f'Cтрока для изменений:\n {line}')
+        old_id = (ast.literal_eval(line))['ID']
     print('Вводите новые поля записи')
-    lines[num] = str(Record.from_input().convert_record_to_dict()) + '\n'
+    lines[num-1] = str(Record.from_input(old_id).convert_record_to_dict()) + '\n'
     with open(directory, 'w+') as file:
         for elem in lines:
             file.write(elem)
@@ -113,7 +132,7 @@ def change_book(directory: str):
 
 
 def comprasion(s_elem: dict, elem_from_file: dict):
-    for key in s_elem.keys():
+    for key in (s_elem.keys() - {'ID'}):
         if s_elem[key] != elem_from_file[key] and s_elem[key] != 'None':
             return False
     return True
@@ -121,7 +140,7 @@ def comprasion(s_elem: dict, elem_from_file: dict):
 
 def search(file_name: str):
     print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
-    search_element: dict = Record.from_input().convert_record_to_dict()
+    search_element: dict = Record.from_input(-1).convert_record_to_dict()
     print('\n')
     with open(file_name, 'r+') as file:
         lines: list = file.readlines()
