@@ -2,6 +2,12 @@ import ast
 
 
 class Validation(object):
+
+    @staticmethod
+    def input_data():
+        data: str = input()
+        return data
+
     @staticmethod
     def validate_int():
         while True:
@@ -29,7 +35,7 @@ class Validation(object):
     def validate_titles(explantion: str):
         while True:
             print(f'{explantion}', end="")
-            title: str = input()
+            title: str = Validation.input_data()
             if len(title) < 1:
                 print('Некорректный ввод. Введите ещё раз.')
             else:
@@ -39,9 +45,11 @@ class Validation(object):
     def validate_number(explantion: str):
         while True:
             print(f'{explantion}', end="")
-            phone_number: str = input()
-            if (len(phone_number) == 11 and phone_number.isdigit()) | (phone_number[0] == '+'
-                        and len(phone_number) == 12 and phone_number[1:].isdigit()) | (phone_number == 'None'):
+            phone_number: str = Validation.input_data()
+            if (len(phone_number) == 11 and
+                phone_number.isdigit()) | (phone_number[0] == '+' and
+                                           len(phone_number) == 12 and
+                                           phone_number[1:].isdigit()) | (phone_number == 'None'):
                 return phone_number
             else:
                 print('Некорректный номер. Введите ещё раз')
@@ -103,8 +111,8 @@ def numbers_of_lines(array_of_dictionary: list):
 
 def print_info(array_of_dictionary: list):
     if len(array_of_dictionary) > 0:
-        for elem in array_of_dictionary:
-            d_elem: dict = ast.literal_eval(str(elem))
+        for element in array_of_dictionary:
+            d_elem: dict = ast.literal_eval(str(element))
             print_dict(d_elem)
     else:
         print('Файл пуст\n')
@@ -118,7 +126,8 @@ def change_book(array_of_dictionary: list):
     print(f'Cтрока для изменений:\n {line}')
     old_id = (ast.literal_eval(line))['ID']
     print('Вводите новые поля записи')
-    array_of_dictionary[num - 1] = str(Record.from_input(old_id, len(array_of_dictionary)).convert_record_to_dict()) + '\n'
+    array_of_dictionary[num - 1] = str(Record.from_input(old_id,
+                                                         len(array_of_dictionary)).convert_record_to_dict()) + '\n'
     print('\n')
 
 
@@ -134,8 +143,8 @@ def search(array_of_dictionary: list):
     search_element: dict = Record.from_input(-1, len(array_of_dictionary)).convert_record_to_dict()
     print('\n')
     records: list = []
-    for elem in array_of_dictionary:
-        d_elem: dict = ast.literal_eval(str(elem))
+    for element in array_of_dictionary:
+        d_elem: dict = ast.literal_eval(str(element))
         result: bool = comprasion(search_element, d_elem)
         if result:
             records.append(d_elem)
