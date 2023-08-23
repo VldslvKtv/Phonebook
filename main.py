@@ -85,56 +85,56 @@ class Record(object):
                 'Work_phone': self.work_phone, 'Personal_phone': self.personal_phone}
 
 
-def print_dict(dict_for_print: dict):
-    for key, value in dict_for_print.items():
+def print_dict(array_of_dictionary: dict):
+    for key, value in array_of_dictionary.items():
         print("{}: {}".format(key, value))
     print('\n')
 
 
-def add_note(directory: list):
+def add_note(array_of_dictionary: list):
     print('Добавить запись:')
-    new_elem: str = str(Record.from_input(0, len(directory)).convert_record_to_dict()) + '\n'
-    directory.append(new_elem)
+    new_elem: str = str(Record.from_input(0, len(array_of_dictionary)).convert_record_to_dict()) + '\n'
+    array_of_dictionary.append(new_elem)
 
 
-def numbers_of_lines(directory: list):
-    return len(directory)
+def numbers_of_lines(array_of_dictionary: list):
+    return len(array_of_dictionary)
 
 
-def print_info(directory: list):
-    if len(directory) > 0:
-        for elem in directory:
+def print_info(array_of_dictionary: list):
+    if len(array_of_dictionary) > 0:
+        for elem in array_of_dictionary:
             d_elem: dict = ast.literal_eval(str(elem))
             print_dict(d_elem)
     else:
         print('Файл пуст\n')
 
 
-def change_book(directory: list):
-    quantity = numbers_of_lines(directory)
+def change_book(array_of_dictionary: list):
+    quantity = numbers_of_lines(array_of_dictionary)
     print(f'Выберете id записи, начиная c 1 и до {quantity}')
     num = Validation.validation_line_number(quantity)
-    line = directory[num - 1]
+    line = array_of_dictionary[num - 1]
     print(f'Cтрока для изменений:\n {line}')
     old_id = (ast.literal_eval(line))['ID']
     print('Вводите новые поля записи')
-    directory[num - 1] = str(Record.from_input(old_id, len(directory)).convert_record_to_dict()) + '\n'
+    array_of_dictionary[num - 1] = str(Record.from_input(old_id, len(array_of_dictionary)).convert_record_to_dict()) + '\n'
     print('\n')
 
 
 def comprasion(s_elem: dict, elem_from_file: dict):
     for key in (s_elem.keys() - {'ID'}):
-        if s_elem[key] != elem_from_file[key] and s_elem[key] != 'None':
+        if s_elem[key].casefold() != elem_from_file[key].casefold() and s_elem[key].casefold() != 'none':
             return False
     return True
 
 
-def search(directory: list):
+def search(array_of_dictionary: list):
     print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
-    search_element: dict = Record.from_input(-1, len(directory)).convert_record_to_dict()
+    search_element: dict = Record.from_input(-1, len(array_of_dictionary)).convert_record_to_dict()
     print('\n')
     records: list = []
-    for elem in directory:
+    for elem in array_of_dictionary:
         d_elem: dict = ast.literal_eval(str(elem))
         result: bool = comprasion(search_element, d_elem)
         if result:
