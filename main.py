@@ -2,7 +2,42 @@ import json
 import ast
 
 
-class Phonebook(object):
+class Validation():
+
+    @staticmethod
+    def validate_titles(explantion: str):
+        while True:
+            print(f'{explantion}', end="")
+            title: str = input()
+            if len(title) < 1:
+                print('Некорректный ввод. Введите ещё раз.')
+            else:
+                return title
+
+    @staticmethod
+    def validate_number(explantion: str):
+        while True:
+            print(f'{explantion}', end="")
+            phone_number: str = input()
+            if (len(phone_number) == 11 and phone_number.isdigit()) | (phone_number[0] == '+'
+                                                                       and len(phone_number) == 12 and phone_number[
+                                                                                                       1:].isdigit()) | (
+                    phone_number == 'None'):
+                return phone_number
+            else:
+                print('Некорректный номер. Введите ещё раз')
+
+    @staticmethod
+    def validation_line_number(quantity_lines):
+        while True:
+            line_number: int = int(input())
+            if line_number < 0 | line_number > (quantity_lines - 1):
+                print('Некорректно введен номер записи. Попробуйте еще раз.')
+            else:
+                return line_number
+
+
+class Record(object):
     def __init__(self, name: str, lastname: str, surname: str, organization: str, work_phone: str, personal_phone: str):
         self.name = name
         self.lastname = lastname
@@ -14,47 +49,30 @@ class Phonebook(object):
     @classmethod
     def from_input(cls):
         return cls(
-            check_titles('Name: '),
-            check_titles('Lastname: '),
-            check_titles('Surname: '),
-            check_titles('Organization: '),
-            check_number('Work_phone: '),
-            check_number('Personal_phone: ')
+            Validation.validate_titles('Name: '),
+            Validation.validate_titles('Lastname: '),
+            Validation.validate_titles('Surname: '),
+            Validation.validate_titles('Organization: '),
+            Validation.validate_number('Work_phone: '),
+            Validation.validate_number('Personal_phone: ')
         )
 
-    def asdict(self):
+    def convert_record_to_dict(self):
         return {'Name': self.name, 'Lastname': self.lastname, 'Surname': self.surname,
                 'Organization': self.organization,
                 'Work_phone': self.work_phone, 'Personal_phone': self.personal_phone}
 
 
-def check_titles(explantion: str):
-    while True:
-        print(f'{explantion}', end="")
-        title: str = input()
-        if len(title) < 1:
-            print('Некорректный ввод. Введите ещё раз.')
-        else:
-            return title
-
-
-def check_number(explantion: str):
-    while True:
-        print(f'{explantion}', end="")
-        phone_number: str = input()
-        if (len(phone_number) == 12 and phone_number.isdigit()) | (phone_number[0] == '+'
-                                                                   and len(phone_number) == 12 and phone_number[
-                                                                                                   1:].isdigit()) | (
-                phone_number == 'None'):
-            return phone_number
-        else:
-            print('Некорректный номер. Введите ещё раз')
+def print_dict(dict_for_print: dict):
+    for key, value in dict_for_print.items():
+        print("{}: {}".format(key, value))
+    print('\n')
 
 
 def add_note(directory: str):
     print('Добавить запись:')
     with open(directory, 'a+') as f:
-        new_elem: dict = Phonebook.from_input().asdict()
+        new_elem: dict = Record.from_input().convert_record_to_dict()
         f.write(str(new_elem) + '\n')
         f.close()
 
@@ -63,9 +81,7 @@ def print_info(directory: str):
     with open(directory, 'r') as file:  # открыли файл с данными
         for elem in file:
             d_elem: dict = ast.literal_eval(elem)
-            for key, value in d_elem.items():
-                print("{}: {}".format(key, value))
-            print('\n')
+            print_dict(d_elem)
 
 
 def numbers_of_lines(directory: str):
@@ -77,17 +93,11 @@ def numbers_of_lines(directory: str):
 def change_book(directory: str):
     quantity = numbers_of_lines(directory)
     print(f'Выберете номер записи, начиная c 0 и до {quantity - 1}')
-    while True:
-        num: int = int(input())
-        if num < 0 | num > (quantity - 1):
-            print('Некорректно введен номер записи. Попробуйте еще раз.')
-        else:
-            break
-    count: int = 0
+    num = Validation.validation_line_number(quantity)
     with open(directory, 'r+') as file:
         lines: list = file.readlines()
-        print(type(lines))
         file.seek(0)
+        count: int = 0
         while count != num:
             file.readline()
             count += 1
@@ -95,7 +105,7 @@ def change_book(directory: str):
         print('Cтрока для изменений:')
         print(line)
     print('Вводите новые поля записи')
-    lines[num] = str(Phonebook.from_input().asdict()) + '\n'
+    lines[num] = str(Record.from_input().convert_record_to_dict()) + '\n'
     with open(directory, 'w+') as file:
         for elem in lines:
             file.write(elem)
@@ -109,11 +119,11 @@ def comprasion(s_elem: dict, elem_from_file: dict):
     return True
 
 
-def search(directory: str):
+def search(file_name: str):
     print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
-    search_element: dict = Phonebook.from_input().asdict()
+    search_element: dict = Record.from_input().convert_record_to_dict()
     print('\n')
-    with open(directory, 'r+') as file:
+    with open(file_name, 'r+') as file:
         lines: list = file.readlines()
     records: list = []
     for elem in lines:
@@ -127,10 +137,8 @@ def search(directory: str):
     else:
         print('Найдены следующие записи:\n')
         for record in records:
-            for key, value in record.items():
-                print("{}: {}".format(key, value))
-            print('\n')
-        return print('Конец \n')
+            print_dict(record)
+        return print('\n')
 
 
 if __name__ == "__main__":
