@@ -1,15 +1,11 @@
-import json
 import ast
-import os
 
 
 class Validation(object):
-    BASE_DIRECTORY: str = 'base.txt'
-
     @staticmethod
-    def validate_id(explantion: str, directory: str, former_id: int):
+    def validate_id(explantion: str, quantity: int, former_id: int):
         if former_id == 0:
-            new_id = numbers_of_lines(directory) + 1
+            new_id = quantity + 1
             print(f'{explantion}{new_id}')
             return new_id
         elif former_id == -1:
@@ -35,7 +31,9 @@ class Validation(object):
             print(f'{explantion}', end="")
             phone_number: str = input()
             if (len(phone_number) == 11 and phone_number.isdigit()) | (phone_number[0] == '+'
-                    and len(phone_number) == 12 and phone_number[1:].isdigit()) | (phone_number == 'None'):
+                                                                       and len(phone_number) == 12 and phone_number[
+                                                                                                       1:].isdigit()) | (
+                    phone_number == 'None'):
                 return phone_number
             else:
                 print('Некорректный номер. Введите ещё раз')
@@ -62,9 +60,9 @@ class Record(object):
         self.personal_phone = personal_phone
 
     @classmethod
-    def from_input(cls, former_id: int):
+    def from_input(cls, former_id: int, quantity: int):
         return cls(
-            Validation.validate_id('ID: ', Validation.BASE_DIRECTORY, former_id),
+            Validation.validate_id('ID: ', quantity, former_id),
             Validation.validate_titles('Name: '),
             Validation.validate_titles('Lastname: '),
             Validation.validate_titles('Surname: '),
@@ -85,49 +83,34 @@ def print_dict(dict_for_print: dict):
     print('\n')
 
 
-def add_note(directory: str):
+def add_note(directory: list):
     print('Добавить запись:')
-    with open(directory, 'a+') as f:
-        new_elem: dict = Record.from_input(0).convert_record_to_dict()
-        f.write(str(new_elem) + '\n')
-        f.close()
+    new_elem: str = str(Record.from_input(0, len(directory)).convert_record_to_dict()) + '\n'
+    directory.append(new_elem)
 
 
-def numbers_of_lines(directory: str):
-    with open(directory, 'r+') as file:
-        lines: list = file.readlines()
-    return len(lines)
+def numbers_of_lines(directory: list):
+    return len(directory)
 
 
-def print_info(directory: str):
-    with open(directory, 'r') as file:  # открыли файл с данными
-        if os.path.getsize(directory) > 0:
-            for elem in file:
-                d_elem: dict = ast.literal_eval(elem)
-                print_dict(d_elem)
-        else:
-            print('Файл пуст\n')
+def print_info(directory: list):
+    if len(directory) > 0:
+        for elem in directory:
+            d_elem: dict = ast.literal_eval(str(elem))
+            print_dict(d_elem)
+    else:
+        print('Файл пуст\n')
 
 
-def change_book(directory: str):
+def change_book(directory: list):
     quantity = numbers_of_lines(directory)
     print(f'Выберете id записи, начиная c 1 и до {quantity}')
     num = Validation.validation_line_number(quantity)
-    with open(directory, 'r+') as file:
-        lines: list = file.readlines()
-        file.seek(0)
-        count: int = 0
-        while count != num-1:
-            file.readline()
-            count += 1
-        line: str = file.readline()
-        print(f'Cтрока для изменений:\n {line}')
-        old_id = (ast.literal_eval(line))['ID']
+    line = directory[num - 1]
+    print(f'Cтрока для изменений:\n {line}')
+    old_id = (ast.literal_eval(line))['ID']
     print('Вводите новые поля записи')
-    lines[num-1] = str(Record.from_input(old_id).convert_record_to_dict()) + '\n'
-    with open(directory, 'w+') as file:
-        for elem in lines:
-            file.write(elem)
+    directory[num - 1] = str(Record.from_input(old_id, len(directory)).convert_record_to_dict()) + '\n'
     print('\n')
 
 
@@ -138,16 +121,13 @@ def comprasion(s_elem: dict, elem_from_file: dict):
     return True
 
 
-def search(file_name: str):
+def search(directory: list):
     print('Если по какой-то характеристике не нужен поиск - впишите в значения поля None')
-    search_element: dict = Record.from_input(-1).convert_record_to_dict()
+    search_element: dict = Record.from_input(-1, len(directory)).convert_record_to_dict()
     print('\n')
-    with open(file_name, 'r+') as file:
-        lines: list = file.readlines()
     records: list = []
-    for elem in lines:
-        d_elem: str = elem.replace("'", "\"")
-        d_elem: dict = json.loads(d_elem)
+    for elem in directory:
+        d_elem: dict = ast.literal_eval(str(elem))
         result: bool = comprasion(search_element, d_elem)
         if result:
             records.append(d_elem)
@@ -162,6 +142,8 @@ def search(file_name: str):
 
 if __name__ == "__main__":
     BASE_DIRECTORY: str = 'base.txt'
+    with open(BASE_DIRECTORY, 'r+') as file:
+        array_of_dict: list = file.readlines()
     print('\033[1m' + 'Телефонный справочник' + '\033[0m\n')
     while True:
         print('Информация для взаимодействия со справочником:')
@@ -171,14 +153,17 @@ if __name__ == "__main__":
         action: str = input()
         match action:
             case '1':
-                print_info(BASE_DIRECTORY)
+                print_info(array_of_dict)
             case '2':
-                add_note(BASE_DIRECTORY)
+                add_note(array_of_dict)
             case '3':
-                change_book(BASE_DIRECTORY)
+                change_book(array_of_dict)
             case '4':
-                search(BASE_DIRECTORY)
+                search(array_of_dict)
             case '5':
+                with open(BASE_DIRECTORY, 'w+') as file:
+                    for elem in array_of_dict:
+                        file.write(elem)
                 exit(0)
             case _:
                 print("Такой команды нет. Введите существующую команду.\n")
