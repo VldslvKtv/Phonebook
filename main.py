@@ -36,7 +36,7 @@ class Validation(object):
         while True:
             print(f'{explantion}', end="")
             title: str = Validation.input_data()
-            if len(title) < 1:
+            if len(title) < 1 or not title.isalpha():
                 print('Некорректный ввод. Введите ещё раз.')
             else:
                 return title
@@ -119,15 +119,15 @@ def print_info(array_of_dictionary: list):
 
 
 def change_book(array_of_dictionary: list):
-    quantity = numbers_of_lines(array_of_dictionary)
+    quantity: int = numbers_of_lines(array_of_dictionary)
     print(f'Выберете id записи, начиная c 1 и до {quantity}')
-    num = Validation.validation_line_number(quantity)
-    line = array_of_dictionary[num - 1]
+    num: int = Validation.validation_line_number(quantity)
+    line: str = array_of_dictionary[num - 1]
     print(f'Cтрока для изменений:\n {line}')
-    old_id = (ast.literal_eval(line))['ID']
+    old_id: int = (ast.literal_eval(line))['ID']
     print('Вводите новые поля записи')
-    array_of_dictionary[num - 1] = str(Record.from_input(old_id,
-                                                         len(array_of_dictionary)).convert_record_to_dict()) + '\n'
+    array_of_dictionary[num - 1]: str = str(Record.from_input(old_id,
+                                                              len(array_of_dictionary)).convert_record_to_dict()) + '\n'
     print('\n')
 
 
